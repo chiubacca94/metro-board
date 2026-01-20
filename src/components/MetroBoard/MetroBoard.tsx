@@ -150,7 +150,7 @@ const MetroBoard: React.FC = () => {
     }
   };
 
-  // Test metro service
+  // Get all stations from the metroService
   const [allStations, setAllStations] = useState<string[]>([]);
 
   useEffect(() => {
