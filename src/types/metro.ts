@@ -9,9 +9,22 @@ export interface Arrival {
 }
 
 export interface Station {
-  id: string;
-  name: string;
-  lines: string[];
+  Code: string;
+  Name: string;
+  StationTogether1: string;
+  StationTogether2: string;
+  LineCode1: string;
+  LineCode2: string | null;
+  LineCode3: string | null;
+  LineCode4: string | null;
+  Lat: number;
+  Lon: number;
+  Address: {
+    Street: string;
+    City: string;
+    State: string;
+    Zip: string;
+  };
 }
 
 export interface MetroResponse {

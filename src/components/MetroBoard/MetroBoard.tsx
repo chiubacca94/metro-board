@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Train } from 'lucide-react';
 import './MetroBoard.css'
+import metroService from '../../services/metroService';
+import { Station } from '../../types/metro';
 
 interface Arrival {
   platform: string;
@@ -148,6 +150,29 @@ const MetroBoard: React.FC = () => {
     }
   };
 
+  // Test metro service
+  const [allStations, setAllStations] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const stations = await metroService.getStations();
+        const stationNames = [];
+        
+        for (const station of stations) {
+          stationNames.push(station.Name);
+        }
+        
+        console.log('Station Names:', stationNames);
+        setAllStations(Array.from(new Set(stationNames)).sort());
+        console.log('All Stations:', stations);
+      } catch (error) {
+        console.error('Failed to fetch stations:', error);
+      }
+    };
+    fetchStations();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
       {/* Header */}
@@ -159,13 +184,13 @@ const MetroBoard: React.FC = () => {
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Departures</h1>
                 <div className="flex items-center gap-3 mt-1">
-                  <MapPin className="w-4 h-4 text-slate-400" />
+                  <MapPin className="w-4 h-4 text-slate-400 mt-3" />
                   <select
                     value={currentStation}
                     onChange={(e) => setCurrentStation(e.target.value)}
-                    className="bg-slate-800 text-white border border-slate-700 px-3 py-1 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-700 transition-colors"
+                    className="bg-slate-800 text-white border border-slate-700 px-3 py-1 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-700 transition-colors mt-3"
                   >
-                    {stations.map((station) => (
+                    {allStations.map((station) => (
                       <option key={station} value={station} className="bg-slate-800">
                         {station}
                       </option>

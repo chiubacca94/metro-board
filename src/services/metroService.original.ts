@@ -2,15 +2,14 @@ import apiService from './baseAPI';
 import { MetroResponse, Station, Arrival } from '../types/metro';
 
 class MetroService {
-  private readonly BASE_PATH = 'http://api.wmata.com/';
+  private readonly BASE_PATH = '/metro';
 
   /**
    * Get all available stations
    */
   async getStations(): Promise<Station[]> {
     try {
-      const response = await apiService.get<{ Stations: Station[] }>(`${this.BASE_PATH}Rail.svc/json/jStations`);
-      return response.Stations;
+      return await apiService.get<Station[]>(`${this.BASE_PATH}/stations`);
     } catch (error) {
       console.error('Error fetching stations:', error);
       throw error;

@@ -9,6 +9,7 @@ class ApiService {
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
+        'api_key': process.env.REACT_APP_API_KEY || '3708776e1b84496e9ad047d682aa7e44',
       },
     });
 

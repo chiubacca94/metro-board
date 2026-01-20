@@ -1,4 +1,3 @@
-import React from 'react';
 import MetroBoard from './components/MetroBoard/MetroBoard';
 
 function App() {
