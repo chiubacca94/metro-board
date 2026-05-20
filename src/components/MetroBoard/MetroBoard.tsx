@@ -100,7 +100,7 @@ const MetroBoard: React.FC = () => {
                   <select
                     value={currentStation}
                     onChange={(e) => setCurrentStation(e.target.value)}
-                    className="bg-slate-800 text-white border border-slate-700 px-3 py-1 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-700 transition-colors mt-3"
+                    className="bg-slate-800 text-white border border-slate-700 px-2 py-0.5 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-slate-700 transition-colors mt-2 max-w-[180px] truncate"
                   >
                     {allStations.map((station) => (
                       <option key={station} value={station} className="bg-slate-800">
