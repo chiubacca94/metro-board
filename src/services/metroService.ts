@@ -6,7 +6,7 @@ const LINE_CODES: Record<string, string> = {
 };
 
 class MetroService {
-  private readonly BASE_PATH = 'http://api.wmata.com/';
+  private readonly BASE_PATH = 'https://api.wmata.com/';
   private stationCache: Station[] = [];
 
   async getStations(): Promise<string[]> {
