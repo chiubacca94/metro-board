@@ -1,73 +1,59 @@
 import apiService from './baseAPI';
-import { MetroResponse, Station, Arrival } from '../types/metro';
+import { Arrival, MetroResponse, Station, WMATATrain } from '../types/metro';
+
+const LINE_CODES: Record<string, string> = {
+  RD: 'Red', BL: 'Blue', OR: 'Orange', SV: 'Silver', GR: 'Green', YL: 'Yellow',
+};
 
 class MetroService {
   private readonly BASE_PATH = 'http://api.wmata.com/';
+  private stationCache: Station[] = [];
 
-  /**
-   * Get all available stations
-   */
-  async getStations(): Promise<Station[]> {
+  async getStations(): Promise<string[]> {
     try {
       const response = await apiService.get<{ Stations: Station[] }>(`${this.BASE_PATH}Rail.svc/json/jStations`);
-      return response.Stations;
+      this.stationCache = response.Stations;
+      return response.Stations.map(s => s.Name);
     } catch (error) {
       console.error('Error fetching stations:', error);
       throw error;
     }
   }
 
-  /**
-   * Get arrivals for a specific station
-   */
   async getArrivals(stationName: string): Promise<MetroResponse> {
     try {
-      return await apiService.get<MetroResponse>(
-        `${this.BASE_PATH}/arrivals/${encodeURIComponent(stationName)}`
+      if (this.stationCache.length === 0) {
+        await this.getStations();
+      }
+      const station = this.stationCache.find(s => s.Name === stationName);
+      const stationCode = station?.Code ?? 'A01';
+
+      const response = await apiService.get<{ Trains: WMATATrain[] }>(
+        `${this.BASE_PATH}StationPrediction.svc/json/GetPrediction/${stationCode}`
       );
+
+      const trains: Arrival[] = response.Trains.map(train => {
+        const isBoarding = train.Min === 'BRD';
+        const isArriving = train.Min === 'ARR';
+        const isDelayed = train.Min === 'DLY';
+        return {
+          platform: train.Group,
+          line: LINE_CODES[train.Line] ?? train.Line,
+          destination: train.DestinationName,
+          via: '',
+          time: isBoarding || isArriving ? '0' : isDelayed ? '?' : train.Min,
+          status: isBoarding ? 'BRD' : isArriving ? 'ARR' : isDelayed ? 'DLY' : 'SCH',
+          delayed: isDelayed,
+        };
+      });
+
+      return { station: stationName, Trains: trains, lastUpdated: new Date().toISOString() };
     } catch (error) {
       console.error(`Error fetching arrivals for ${stationName}:`, error);
       throw error;
     }
   }
-
-  /**
-   * Get arrivals by line
-   */
-  async getArrivalsByLine(line: string): Promise<Arrival[]> {
-    try {
-      return await apiService.get<Arrival[]>(`${this.BASE_PATH}/arrivals/line/${line}`);
-    } catch (error) {
-      console.error(`Error fetching arrivals for line ${line}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get real-time train updates for a station
-   */
-  async getRealTimeUpdates(stationName: string): Promise<MetroResponse> {
-    try {
-      return await apiService.get<MetroResponse>(
-        `${this.BASE_PATH}/realtime/${encodeURIComponent(stationName)}`
-      );
-    } catch (error) {
-      console.error(`Error fetching real-time updates for ${stationName}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Report a delay
-   */
-  async reportDelay(data: { station: string; line: string; description: string }): Promise<void> {
-    try {
-      await apiService.post(`${this.BASE_PATH}/report-delay`, data);
-    } catch (error) {
-      console.error('Error reporting delay:', error);
-      throw error;
-    }
-  }
 }
 
-export default new MetroService();
+const metroService = new MetroService();
+export default metroService;

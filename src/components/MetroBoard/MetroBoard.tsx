@@ -2,108 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Clock, Train } from 'lucide-react';
 import './MetroBoard.css'
 import metroService from '../../services/metroService';
-import { Station } from '../../types/metro';
-
-interface Arrival {
-  platform: string;
-  line: string;
-  destination: string;
-  via: string;
-  time: string;
-  status: string;
-  delayed: boolean;
-}
+import { Arrival } from '../../types/metro';
 
 const MetroBoard: React.FC = () => {
   const [currentStation, setCurrentStation] = useState<string>('Metro Center');
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
-  const stations: string[] = [
-    'Metro Center',
-    'Gallery Place',
-    'Union Station',
-    'L\'Enfant Plaza',
-    'Dupont Circle',
-    'Farragut North',
-    'Foggy Bottom',
-    'Rosslyn',
-    'Pentagon',
-    'Arlington Cemetery',
-    'Crystal City',
-    'Judiciary Square',
-    'Eastern Market',
-    'Capitol South',
-    'Smithsonian',
-    'Federal Triangle',
-    'Archives',
-    'Waterfront',
-    'Navy Yard',
-    'Anacostia',
-    'Vienna'
-  ].sort();
-
-  const getArrivals = (station: string): Arrival[] => {
-    // This function would normally fetch real-time data from an API
-    // For this example, we will return hard-coded data
-    return [];
-  }
-
-  // Hard codes the arrivals data for demonstration purposes
-  const generateArrivals = (station: string): Arrival[] => {
-    const arrivalsByStation: Record<string, Arrival[]> = {
-      'Metro Center': [
-        { platform: 'B1', line: 'Red', destination: 'Shady Grove', via: 'Dupont Circle, Farragut North', time: '2', status: 'BRD', delayed: false },
-        { platform: 'A2', line: 'Orange', destination: 'Vienna', via: 'Foggy Bottom, Rosslyn', time: '3', status: 'ARR', delayed: false },
-        { platform: 'B2', line: 'Red', destination: 'Glenmont', via: 'Gallery Place, Union Station', time: '5', status: 'ARR', delayed: false },
-        { platform: 'A1', line: 'Blue', destination: 'Franconia-Springfield', via: 'Pentagon, Crystal City', time: '6', status: 'ARR', delayed: false },
-        { platform: 'A2', line: 'Silver', destination: 'Ashburn', via: 'Foggy Bottom, Rosslyn', time: '9', status: 'DLY', delayed: true },
-        { platform: 'A2', line: 'Orange', destination: 'Vienna', via: 'Foggy Bottom, Rosslyn', time: '11', status: 'ARR', delayed: false },
-        { platform: 'B1', line: 'Red', destination: 'Shady Grove', via: 'Dupont Circle, Farragut North', time: '12', status: 'ARR', delayed: false }
-      ],
-      'Gallery Place': [
-        { platform: 'A1', line: 'Red', destination: 'Shady Grove', via: 'Metro Center, Farragut North', time: '1', status: 'BRD', delayed: false },
-        { platform: 'A2', line: 'Red', destination: 'Glenmont', via: 'Union Station, Rhode Island Ave', time: '4', status: 'ARR', delayed: false },
-        { platform: 'B1', line: 'Green', destination: 'Branch Ave', via: 'Navy Yard, Anacostia', time: '6', status: 'ARR', delayed: false },
-        { platform: 'B2', line: 'Yellow', destination: 'Huntington', via: 'L\'Enfant Plaza, Pentagon', time: '8', status: 'ARR', delayed: false },
-        { platform: 'A1', line: 'Red', destination: 'Shady Grove', via: 'Metro Center, Farragut North', time: '10', status: 'ARR', delayed: false }
-      ],
-      'Union Station': [
-        { platform: 'A1', line: 'Red', destination: 'Glenmont', via: 'Rhode Island Ave, Brookland', time: '3', status: 'BRD', delayed: false },
-        { platform: 'A2', line: 'Red', destination: 'Shady Grove', via: 'Gallery Place, Metro Center', time: '5', status: 'ARR', delayed: false },
-        { platform: 'A1', line: 'Red', destination: 'Glenmont', via: 'Rhode Island Ave, Brookland', time: '11', status: 'ARR', delayed: false },
-        { platform: 'A2', line: 'Red', destination: 'Shady Grove', via: 'Gallery Place, Metro Center', time: '13', status: 'ARR', delayed: false }
-      ],
-      'L\'Enfant Plaza': [
-        { platform: 'A1', line: 'Orange', destination: 'New Carrollton', via: 'Capitol South, Eastern Market', time: '2', status: 'BRD', delayed: false },
-        { platform: 'B1', line: 'Blue', destination: 'Franconia-Springfield', via: 'Pentagon, Crystal City', time: '4', status: 'ARR', delayed: false },
-        { platform: 'C1', line: 'Green', destination: 'Branch Ave', via: 'Waterfront, Navy Yard', time: '5', status: 'ARR', delayed: false },
-        { platform: 'D1', line: 'Yellow', destination: 'Huntington', via: 'Pentagon, Crystal City', time: '7', status: 'ARR', delayed: false },
-        { platform: 'A2', line: 'Silver', destination: 'Ashburn', via: 'Foggy Bottom, Rosslyn', time: '9', status: 'ARR', delayed: false },
-        { platform: 'B2', line: 'Blue', destination: 'Largo Town Center', via: 'Capitol South, Stadium-Armory', time: '12', status: 'DLY', delayed: true }
-      ],
-      'Rosslyn': [
-        { platform: 'A1', line: 'Orange', destination: 'New Carrollton', via: 'Foggy Bottom, Metro Center', time: '3', status: 'BRD', delayed: false },
-        { platform: 'A2', line: 'Silver', destination: 'Ashburn', via: 'Tysons, Reston', time: '4', status: 'ARR', delayed: false },
-        { platform: 'B1', line: 'Blue', destination: 'Franconia-Springfield', via: 'Pentagon, Crystal City', time: '6', status: 'ARR', delayed: false },
-        { platform: 'A1', line: 'Orange', destination: 'Vienna', via: 'Ballston, East Falls Church', time: '8', status: 'ARR', delayed: false },
-        { platform: 'A2', line: 'Silver', destination: 'Largo Town Center', via: 'Foggy Bottom, Metro Center', time: '10', status: 'ARR', delayed: false }
-      ],
-      'Vienna': [
-        { platform: 'A1', line: 'Orange', destination: 'New Carrollton', via: 'Dunn Loring, Metro Center', time: '11', status: 'BRD', delayed: false },
-        { platform: 'A1', line: 'Orange', destination: 'New Carrollton', via: 'Dunn Loring, Metro Center', time: '4', status: 'ARR', delayed: false },
-      ]
-    };
-
-    return arrivalsByStation[station] || [
-      { platform: 'A1', line: 'Red', destination: 'Shady Grove', via: 'Metro Center, Dupont Circle', time: '3', status: 'ARR', delayed: false },
-      { platform: 'A2', line: 'Red', destination: 'Glenmont', via: 'Gallery Place, Union Station', time: '6', status: 'ARR', delayed: false },
-      { platform: 'B1', line: 'Blue', destination: 'Franconia-Springfield', via: 'Pentagon, Crystal City', time: '8', status: 'ARR', delayed: false },
-      { platform: 'B2', line: 'Orange', destination: 'Vienna', via: 'Rosslyn, Ballston', time: '11', status: 'ARR', delayed: false },
-      { platform: 'C1', line: 'Green', destination: 'Branch Ave', via: 'Navy Yard, Anacostia', time: '13', status: 'ARR', delayed: false }
-    ];
-  };
-
-  const [arrivals, setArrivals] = useState<Arrival[]>(generateArrivals(currentStation));
+  const [arrivals, setArrivals] = useState<Arrival[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -112,8 +17,19 @@ const MetroBoard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+
   useEffect(() => {
-    setArrivals(generateArrivals(currentStation));
+    const fetchArrivals = async () => {
+      try {
+        const data = await metroService.getArrivals(currentStation);
+        setArrivals(data.Trains);
+      } catch (error) {
+        console.error('Failed to fetch arrivals:', error);
+      }
+    };
+    fetchArrivals();
+    const poll = setInterval(fetchArrivals, 30_000);
+    return () => clearInterval(poll);
   }, [currentStation]);
 
   const formatTime = (date: Date): string => {
@@ -157,11 +73,7 @@ const MetroBoard: React.FC = () => {
     const fetchStations = async () => {
       try {
         const stations = await metroService.getStations();
-        const stationNames = [];
-        
-        for (const station of stations) {
-          stationNames.push(station.Name);
-        }
+        const stationNames = stations;
         
         console.log('Station Names:', stationNames);
         setAllStations(Array.from(new Set(stationNames)).sort());
@@ -216,7 +128,6 @@ const MetroBoard: React.FC = () => {
         <div className="grid grid-cols-11 gap-6 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
           <div className="col-span-1">Line</div>
           <div className="col-span-3">Destination</div>
-          <div className="col-span-4">Via</div>
           <div className="col-span-2">Departs In</div>
           <div className="col-span-1 text-right">Status</div>
         </div>
@@ -236,9 +147,6 @@ const MetroBoard: React.FC = () => {
               </div>
               <div className="col-span-3">
                 <div className="font-semibold text-lg">{arrival.destination}</div>
-              </div>
-              <div className="col-span-4">
-                <div className="text-slate-400 text-sm">{arrival.via || '—'}</div>
               </div>
               <div className="col-span-2">
                 <div className="flex items-baseline gap-1">

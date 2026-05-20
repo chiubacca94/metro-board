@@ -27,8 +27,20 @@ export interface Station {
   };
 }
 
+export interface WMATATrain {
+  Car: string;
+  Destination: string;
+  DestinationCode: string;
+  DestinationName: string;
+  Group: string;
+  Line: string;
+  LocationCode: string;
+  LocationName: string;
+  Min: string;
+}
+
 export interface MetroResponse {
   station: string;
-  arrivals: Arrival[];
+  Trains: Arrival[];
   lastUpdated: string;
 }
